@@ -49,7 +49,7 @@ func (r StatementsOpts) Validate() error {
 // Represents statements list of a p24 merchant
 type Statements struct {
 	Status     string      `xml:"status,attr"`
-	Statements []Statement `xml:"statements"`
+	Statements []Statement `xml:"statement"`
 	Credit     Amount      `xml:"credit,attr"`
 	Debet      Amount      `xml:"debet,attr"`
 }
@@ -67,29 +67,29 @@ type Statement struct {
 }
 
 type (
-	statementsAlias       Statement
-	statementsXMLMappings struct {
+	statementAlias       Statement
+	statementXMLMappings struct {
 		XMLName     xml.Name `xml:"statement"`
 		TranTimeStr string   `xml:"trantime,attr"`
 		TranDateStr string   `xml:"trandate,attr"`
-		statementsAlias
+		statementAlias
 	}
 )
 
 // UnmarshalXML implements xml.Unmarshaler interface for s
 func (s *Statement) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
-	statements := &statementsXMLMappings{}
-	if err := d.DecodeElement(statements, &start); err != nil {
+	statement := &statementXMLMappings{}
+	if err := d.DecodeElement(statement, &start); err != nil {
 		return err
 	}
 
 	// parse tran date/time
 	layout := fmt.Sprintf("%s %s", statementsRespDateLayout, statementsRespTimeLayout)
-	tranDate, err := time.ParseInLocation(layout, fmt.Sprintf("%s %s", statements.TranDateStr, statements.TranTimeStr), kievLocation)
+	tranDate, err := time.ParseInLocation(layout, fmt.Sprintf("%s %s", statement.TranDateStr, statement.TranTimeStr), kievLocation)
 	if err != nil {
 		return err
 	}
-	*s = Statement(statements.statementsAlias)
+	*s = Statement(statement.statementAlias)
 	s.TranDate = tranDate
 
 	return nil
@@ -102,10 +102,10 @@ func (s Statement) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
 		return errors.New("invalid start elem name")
 	}
 
-	statements := &statementsXMLMappings{
-		statementsAlias: statementsAlias(s),
-		TranTimeStr:     s.TranDate.Format(statementsRespTimeLayout),
-		TranDateStr:     s.TranDate.Format(statementsRespDateLayout),
+	statements := &statementXMLMappings{
+		statementAlias: statementAlias(s),
+		TranTimeStr:    s.TranDate.Format(statementsRespTimeLayout),
+		TranDateStr:    s.TranDate.Format(statementsRespDateLayout),
 	}
 
 	return e.EncodeElement(statements, start)
