@@ -71,10 +71,6 @@ func NewClient(opts Opts) *Client {
 // and unmarshal response body to resp if no errors occurred
 // nolint:gocyclo // Is a complexity function
 func (c *Client) DoContext(ctx context.Context, url, method string, req Request, resp *Response) error {
-	if req.Data.Oper == "" {
-		req.Data.Oper = defaultOper
-	}
-
 	// process http req
 	httpReqBody, err := xml.Marshal(req)
 	if err != nil {

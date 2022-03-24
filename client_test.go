@@ -36,7 +36,8 @@ func TestClient_DoContext(t *testing.T) {
 					Oper: defaultOper,
 					Info: struct {
 						Test string `xml:"test"`
-					}{Test: "test"}},
+					}{Test: "test"},
+				},
 			},
 			body: []byte(xml.Header + `<response><data><info><test>test</test></info><oper>cmt</oper></data><merchant><id>id</id><signature>ad67cf1c11e0f87bedac2c9bb260e3abf54e9862</signature></merchant></response>`),
 			m:    Merchant{"id", "pass"},
@@ -50,7 +51,8 @@ func TestClient_DoContext(t *testing.T) {
 					Oper: defaultOper,
 					Info: struct {
 						Test string `xml:"test"`
-					}{Test: "test"}},
+					}{Test: "test"},
+				},
 			},
 			body:    []byte(xml.Header + `<response><data><info><test1>test1</test1></info><oper>cmt</oper></data><merchant><id>id</id><signature>ad67cf1c11e0f87bedac2c9bb260e3abf54e9862</signature></merchant></response>`),
 			m:       Merchant{"id", "pass"},
@@ -65,7 +67,8 @@ func TestClient_DoContext(t *testing.T) {
 					Oper: defaultOper,
 					Info: struct {
 						Test string `xml:"test"`
-					}{Test: "test"}},
+					}{Test: "test"},
+				},
 			},
 			body:    []byte(xml.Header + `<response><data><info><test>test</test></info><oper>cmt</oper></data><merchant><id>id</id><signature>ad67cf1c11e0f87bedac2c9bb260e3abf54e9862</signature></merchant></response>`),
 			m:       Merchant{"id", "other pass"},
@@ -80,7 +83,8 @@ func TestClient_DoContext(t *testing.T) {
 					Oper: defaultOper,
 					Info: struct {
 						Test string `xml:"test"`
-					}{Test: "test"}},
+					}{Test: "test"},
+				},
 			},
 			body:    []byte(xml.Header + `<response><data><info>some error</info><oper>cmt</oper></data><merchant><id>id</id><signature>ad67cf1c11e0f87bedac2c9bb260e3abf54e9862</signature></merchant></response>`),
 			m:       Merchant{"id", "pass"},
@@ -95,7 +99,8 @@ func TestClient_DoContext(t *testing.T) {
 					Oper: defaultOper,
 					Info: struct {
 						Test string `xml:"test"`
-					}{Test: "test"}},
+					}{Test: "test"},
+				},
 			},
 			body:    []byte(xml.Header + `<response><data><info><test>test</test></info><oper>cmt</oper></data><merchant><id>id</id><signature>ad67cf1c11e0f87bedac2c9bb260e3abf54e9862</signature></merchant></response>`),
 			m:       Merchant{"id", "pass"},
@@ -103,7 +108,7 @@ func TestClient_DoContext(t *testing.T) {
 			code:    400,
 		},
 	}
-	url, method, req := "http://localhost", "POST", Request{Data: RequestData{CommonOpts: DefaultCommonOpts()}}
+	url, method, req := "http://localhost", "POST", Request{}
 	exceptedBody, _ := xml.Marshal(req)
 	exceptedBody = []byte(xml.Header + string(exceptedBody))
 

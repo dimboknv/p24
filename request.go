@@ -46,6 +46,10 @@ type Request struct {
 
 // NewRequest returns Request with MerchantSign of reqData
 func NewRequest(m Merchant, reqData RequestData) (Request, error) {
+	if zero := (CommonOpts{}); reqData.CommonOpts == zero {
+		reqData.CommonOpts = DefaultCommonOpts()
+	}
+
 	xmlData, err := xml.Marshal(reqData)
 	if err != nil {
 		return Request{}, errors.Wrap(err, "can`t marshal request data")
