@@ -47,15 +47,15 @@ type Client struct {
 	m    Merchant
 }
 
-// Opts is a full set of all parameters to initialize Client
-type Opts struct {
+// ClientOpts is a full set of all parameters to initialize Client
+type ClientOpts struct {
 	HTTP     Doer
 	Log      Logger
 	Merchant Merchant
 }
 
 // NewClient returns Client instance with given opts
-func NewClient(opts Opts) *Client {
+func NewClient(opts ClientOpts) *Client {
 	var l Logger = LogFunc(func(format string, args ...interface{}) {})
 	if opts.Log != nil {
 		l = opts.Log
