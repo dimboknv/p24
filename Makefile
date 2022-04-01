@@ -1,6 +1,6 @@
 export GO111MODULE := on
 
-GO_TEST=go test -v -race -mod=vendor -timeout=60s -count 1
+GO_TEST=go test -v -race -timeout=60s -count 1
 
 lint:
 	golangci-lint run --config .golangci.yml ./...
