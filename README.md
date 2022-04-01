@@ -28,7 +28,7 @@ import (
 )
 
 func main() {
-	client := p24.NewClient(p24.Opts{
+	client := p24.NewClient(p24.ClientOpts{
 		HTTP: &http.Client{},
 		Merchant: p24.Merchant{
 			ID:   "merchant id",
@@ -41,7 +41,7 @@ func main() {
 	startDate, _ := time.Parse("02.01.2006", "02.01.2021")
 	endDate, _ := time.Parse("02.01.2006", "02.02.2021")
 	ctx := context.Background()
-	statements, err := client.GetStatements(ctx, p24.StatementsReqOpts{
+	statements, err := client.GetStatements(ctx, p24.StatementsOpts{
 		StartDate:  startDate,
 		EndDate:    endDate,
 		CardNumber: "1234567891234567",
@@ -52,7 +52,7 @@ func main() {
 	fmt.Println(statements)
 
 	// get merchant card balance for "1234567891234567" card number
-	cardBalace, err := client.GetCardBalance(ctx, p24.BalanceReqOpts{
+	cardBalace, err := client.GetCardBalance(ctx, p24.BalanceOpts{
 		CardNumber: "1234567891234567",
 		Country:    "UA",
 	})
