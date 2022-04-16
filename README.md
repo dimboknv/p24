@@ -52,13 +52,13 @@ func main() {
 	fmt.Println(statements)
 
 	// get merchant card balance for "1234567891234567" card number
-	cardBalace, err := client.GetCardBalance(ctx, p24.BalanceOpts{
+	cardBalance, err := client.GetCardBalance(ctx, p24.BalanceOpts{
 		CardNumber: "1234567891234567",
 		Country:    "UA",
 	})
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println(cardBalace)
+	fmt.Println(cardBalance)
 }
 ```
