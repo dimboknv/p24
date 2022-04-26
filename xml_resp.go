@@ -64,7 +64,8 @@ func (r xmlResp) dataTagContent() ([]byte, error) {
 func (r xmlResp) commonResp() (resp struct {
 	Data interface{} `xml:"data"`
 	Response
-}, err error) {
+}, err error,
+) {
 	if err := xml.Unmarshal(r, &resp); err != nil {
 		return resp, errors.Wrap(err, "can`t unmarshal common response")
 	}

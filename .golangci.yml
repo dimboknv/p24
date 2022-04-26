@@ -106,4 +106,4 @@ issues:
 
 
 service:
-  golangci-lint-version: 1.44.x
+  golangci-lint-version: 1.45.x
