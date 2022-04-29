@@ -1,4 +1,4 @@
-# `p24`
+# `p24` [![Build Status](https://github.com/dimboknv/p24/workflows/build/badge.svg)](https://github.com/dimboknv/p24/actions) [![Go Report Card](https://goreportcard.com/badge/github.com/dimboknv/p24)](https://goreportcard.com/report/github.com/dimboknv/p24) [![Coverage Status](https://coveralls.io/repos/github/dimboknv/p24/badge.svg?branch=master)](https://coveralls.io/github/dimboknv/p24?branch=master) 
 
 This library provides [privat24 marchant information api](https://api.privatbank.ua/#p24/main) client.
 
