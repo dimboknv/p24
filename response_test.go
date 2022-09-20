@@ -90,64 +90,64 @@ func Test_Response(t *testing.T) {
 
 func Test_respDataErr(t *testing.T) {
 	cases := []struct {
-		expectedErrMsg string
-		resp           []byte
-		withErr        bool
+		expectedMsg string
+		resp        []byte
 	}{
-		{"error msg", []byte(`<response><data><error message="error msg"/></data></response>`), false},
-		{"error msg", []byte(`<response><data><error message="error msg"></error></data></response>`), false},
-		{"", []byte(`<response><data><noterror message ="data"/></data></response>`), true},
+		{"error msg", []byte(`<response><data><error message="error msg"/></data></response>`)},
+		{"error msg", []byte(`<response><data><error message="error msg"></error></data></response>`)},
+		{"", []byte(`<response><data><noterror message ="data"/></data></response>`)},
 	}
 
 	for i, c := range cases {
 		c := c
 		t.Run(fmt.Sprintf("UnmarshalXML/%d", i), func(t *testing.T) {
-			actualErr := &respDataErr{}
-			err := xml.Unmarshal(c.resp, actualErr)
-			require.True(t, c.withErr == (err != nil), err)
-			require.EqualError(t, actualErr, c.expectedErrMsg)
+			actual := &respDataErr{}
+			if err := xml.Unmarshal(c.resp, actual); err != nil {
+				require.Empty(t, c.expectedMsg)
+			}
+			require.EqualError(t, actual, c.expectedMsg)
 		})
 	}
 }
 
 func Test_respDataInfoErr(t *testing.T) {
 	cases := []struct {
-		expectedErrMsg string
-		resp           []byte
-		withErr        bool
+		expectedMsg string
+		resp        []byte
 	}{
-		{"error msg", []byte(`<response><data><oper>cmt</oper><info>error msg</info></data></response>`), false},
-		{"", []byte(`<response><data><oper>cmt</oper><info></info></data></response>`), true},
+		{"error msg", []byte(`<response><data><oper>cmt</oper><info>error msg</info></data></response>`)},
+		{"", []byte(`<response><data><oper>cmt</oper><info></info></data></response>`)},
 	}
 
 	for i, c := range cases {
 		c := c
 		t.Run(fmt.Sprintf("UnmarshalXML/%d", i), func(t *testing.T) {
-			actualErr := &respDataInfoErr{}
-			err := xml.Unmarshal(c.resp, actualErr)
-			require.True(t, c.withErr == (err != nil), err)
-			require.EqualError(t, actualErr, c.expectedErrMsg)
+			actual := &respDataInfoErr{}
+			if err := xml.Unmarshal(c.resp, actual); err != nil {
+				require.Empty(t, c.expectedMsg)
+			}
+			require.EqualError(t, actual, c.expectedMsg)
 		})
 	}
 }
 
 func Test_respErr(t *testing.T) {
 	cases := []struct {
-		expectedErrMsg string
-		resp           []byte
-		withErr        bool
+		expectedMsg string
+		resp        []byte
 	}{
-		{`For input string: "error msg"`, []byte(`<error>For input string: "error msg"</error>`), false},
-		{"", []byte(`<error>For input string: "error msg"</error1>`), true},
+		{`For input string: "error msg"`, []byte(`<error>For input string: "error msg"</error>`)},
+		{"", []byte(`<error>For input string: "error msg"</error1>`)},
 	}
 
 	for i, c := range cases {
 		c := c
 		t.Run(fmt.Sprintf("UnmarshalXML/%d", i), func(t *testing.T) {
-			actualErr := &respErr{}
-			err := xml.Unmarshal(c.resp, actualErr)
-			require.True(t, c.withErr == (err != nil), err)
-			require.EqualError(t, actualErr, c.expectedErrMsg)
+			actual := &respErr{}
+			if err := xml.Unmarshal(c.resp, actual); err != nil {
+				require.Empty(t, c.expectedMsg)
+			}
+			require.EqualError(t, actual, c.expectedMsg)
 		})
 	}
 }

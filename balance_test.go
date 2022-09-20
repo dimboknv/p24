@@ -38,30 +38,34 @@ func Test_CardBalance(t *testing.T) {
 		cases := []struct {
 			data     []byte
 			expected CardBalance
-			withErr  bool
+			errMsg   string
 		}{
 			{
 				[]byte(`<cardbalance><bal_date>02.09.13 21:34</bal_date><bal_dyn>dyn</bal_dyn><card><account>acc</account><card_number>num</card_number><acc_name>name</acc_name><acc_type>acctype</acc_type><currency>UAH</currency><card_type>type</card_type><main_card_number>main</main_card_number><card_stat>Status</card_stat><src>src</src></card><av_balance>1.23</av_balance><balance>3.21</balance><fin_limit>0.10</fin_limit><trade_limit>0.01</trade_limit></cardbalance>`),
 				CardBalance{Date: time.Date(2013, 9, 2, 21, 34, 0, 0, kievLocation), Dyn: "dyn", Card: Card{Account: "acc", Number: "num", AccName: "name", AccType: "acctype", Currency: "UAH", Type: "type", MainCard: "main", Status: "Status", Src: "src"}, Available: 123, Balance: 321, FinLimit: 10, TradeLimit: 1},
-				false,
+				"",
 			},
 			{
 				[]byte(`<cardbalance><bal_date>02.09.13 21:34</bal_date><bal_dyn>dyn</bal_dyn><card><acc`),
 				CardBalance{},
-				true,
+				"unexpected EOF",
 			},
 			{
 				[]byte(`<cardbalance><bal_date>02-09-13 21:34</bal_date></cardbalance>`),
 				CardBalance{},
-				true,
+				"parsing time",
 			},
 		}
 		for i, c := range cases {
 			c := c
 			t.Run(strconv.Itoa(i), func(t *testing.T) {
 				var actual CardBalance
-				err := xml.Unmarshal(c.data, &actual)
-				require.True(t, c.withErr == (err != nil), err)
+				if err := xml.Unmarshal(c.data, &actual); err != nil {
+					require.NotEmpty(t, c.errMsg)
+					require.ErrorContains(t, err, c.errMsg)
+					return
+				}
+				require.Empty(t, c.errMsg)
 				require.Equal(t, c.expected, actual)
 			})
 		}
@@ -75,7 +79,7 @@ func TestClient_GetCardBalance(t *testing.T) {
 		reqBody  []byte
 		respBody []byte
 		expected CardBalance
-		withErr  bool
+		errMsg   string
 	}{
 		{
 			opts: BalanceOpts{
@@ -100,7 +104,7 @@ func TestClient_GetCardBalance(t *testing.T) {
 				CardNumber: "sdalkfj",
 				Country:    "USA",
 			},
-			withErr: true,
+			errMsg: "invalid card number",
 		},
 	}
 	for i, c := range cases {
@@ -118,7 +122,12 @@ func TestClient_GetCardBalance(t *testing.T) {
 
 			cli := Client{do, nil, m}
 			actual, err := cli.GetCardBalance(context.Background(), c.opts)
-			require.True(t, c.withErr == (err != nil), err)
+			if err != nil {
+				require.NotEmpty(t, c.errMsg)
+				require.ErrorContains(t, err, c.errMsg)
+				return
+			}
+			require.Empty(t, c.errMsg)
 			require.Equal(t, c.expected, actual)
 		})
 	}

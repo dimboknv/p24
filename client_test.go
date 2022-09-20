@@ -18,7 +18,7 @@ func TestClient_DoContext(t *testing.T) {
 		m        Merchant
 		body     []byte
 		code     int
-		withErr  bool
+		errMsg   string
 	}{
 		{ // ok
 			expected: Response{
@@ -35,7 +35,7 @@ func TestClient_DoContext(t *testing.T) {
 			m:    Merchant{"id", "pass"},
 			code: 200,
 		},
-		{ // can`t unmarshal xml response
+		{
 			expected: Response{
 				XMLName:      xml.Name{Local: "response"},
 				MerchantSign: MerchantSign{"id", "ad67cf1c11e0f87bedac2c9bb260e3abf54e9862"},
@@ -46,12 +46,12 @@ func TestClient_DoContext(t *testing.T) {
 					}{Test: "test"},
 				},
 			},
-			body:    []byte(xml.Header + `<response><data><info><test>test</test></info><oper>cmt</oper></data><merchant><id>id</id><signature>ad67cf1c11e0f87bedac2c9bb260e3abf54e9862</signature></merchant></response>`),
-			m:       Merchant{"id", "pass"},
-			code:    200,
-			withErr: true,
+			body:   []byte(xml.Header + `<response><data><info><test>test</test></info><oper>cmt</oper></data><merchant><id>id</id><signature>ad67cf1c11e0f87bedac2c9bb260e3abf54e9862</signature></merchant></response>`),
+			m:      Merchant{"id", "pass"},
+			code:   200,
+			errMsg: "can`t unmarshal xml response",
 		},
-		{ // unexpected xml response content
+		{
 			expected: Response{
 				XMLName:      xml.Name{Local: "response"},
 				MerchantSign: MerchantSign{"id", "ad67cf1c11e0f87bedac2c9bb260e3abf54e9862"},
@@ -62,12 +62,12 @@ func TestClient_DoContext(t *testing.T) {
 					}{Test: "test"},
 				},
 			},
-			body:    []byte(xml.Header + `<response><data><info><test>test</test></info><oper>cmt</oper><merchant><id>id</id><signature>ad67cf1c11e0f87bedac2c9bb260e3abf54e9862</signature></merchant></response>`),
-			m:       Merchant{"id", "pass"},
-			code:    200,
-			withErr: true,
+			body:   []byte(xml.Header + `<response><data><info><test>test</test></info><oper>cmt</oper><merchant><id>id</id><signature>ad67cf1c11e0f87bedac2c9bb260e3abf54e9862</signature></merchant></response>`),
+			m:      Merchant{"id", "pass"},
+			code:   200,
+			errMsg: "unexpected xml response content",
 		},
-		{ // can`t unmarshal data
+		{
 			expected: Response{
 				XMLName:      xml.Name{Local: "response"},
 				MerchantSign: MerchantSign{"id", "ad67cf1c11e0f87bedac2c9bb260e3abf54e9862"},
@@ -78,12 +78,12 @@ func TestClient_DoContext(t *testing.T) {
 					}{Test: "test"},
 				},
 			},
-			body:    []byte(xml.Header + `<response><data><info><test1>test1</test1></info><oper>cmt</oper></data><merchant><id>id</id><signature>ad67cf1c11e0f87bedac2c9bb260e3abf54e9862</signature></merchant></response>`),
-			m:       Merchant{"id", "pass"},
-			withErr: true,
-			code:    200,
+			body:   []byte(xml.Header + `<response><data><info><test>test</test></info><oper>cmt</oper></data><merchant><id>id</id><signature>ad67cf1c11e0f87bedac2c9bb260e3abf54e9862</signature></merchant></response>`),
+			m:      Merchant{"id", "other pass"},
+			errMsg: "invalid signature",
+			code:   200,
 		},
-		{ // invalid signature
+		{
 			expected: Response{
 				XMLName:      xml.Name{Local: "response"},
 				MerchantSign: MerchantSign{"id", "ad67cf1c11e0f87bedac2c9bb260e3abf54e9862"},
@@ -94,12 +94,12 @@ func TestClient_DoContext(t *testing.T) {
 					}{Test: "test"},
 				},
 			},
-			body:    []byte(xml.Header + `<response><data><info><test>test</test></info><oper>cmt</oper></data><merchant><id>id</id><signature>ad67cf1c11e0f87bedac2c9bb260e3abf54e9862</signature></merchant></response>`),
-			m:       Merchant{"id", "other pass"},
-			withErr: true,
-			code:    200,
+			body:   []byte(xml.Header + `<response><data><info>some error</info><oper>cmt</oper></data><merchant><id>id</id><signature>ad67cf1c11e0f87bedac2c9bb260e3abf54e9862</signature></merchant></response>`),
+			m:      Merchant{"id", "pass"},
+			errMsg: "xml response with err",
+			code:   200,
 		},
-		{ // xml response with err
+		{
 			expected: Response{
 				XMLName:      xml.Name{Local: "response"},
 				MerchantSign: MerchantSign{"id", "ad67cf1c11e0f87bedac2c9bb260e3abf54e9862"},
@@ -110,26 +110,10 @@ func TestClient_DoContext(t *testing.T) {
 					}{Test: "test"},
 				},
 			},
-			body:    []byte(xml.Header + `<response><data><info>some error</info><oper>cmt</oper></data><merchant><id>id</id><signature>ad67cf1c11e0f87bedac2c9bb260e3abf54e9862</signature></merchant></response>`),
-			m:       Merchant{"id", "pass"},
-			withErr: true,
-			code:    200,
-		},
-		{ // invalid http code
-			expected: Response{
-				XMLName:      xml.Name{Local: "response"},
-				MerchantSign: MerchantSign{"id", "ad67cf1c11e0f87bedac2c9bb260e3abf54e9862"},
-				Data: ResponseData{
-					Oper: defaultOper,
-					Info: struct {
-						Test string `xml:"test"`
-					}{Test: "test"},
-				},
-			},
-			body:    []byte(xml.Header + `<response><data><info><test>test</test></info><oper>cmt</oper></data><merchant><id>id</id><signature>ad67cf1c11e0f87bedac2c9bb260e3abf54e9862</signature></merchant></response>`),
-			m:       Merchant{"id", "pass"},
-			withErr: true,
-			code:    400,
+			body:   []byte(xml.Header + `<response><data><info><test>test</test></info><oper>cmt</oper></data><merchant><id>id</id><signature>ad67cf1c11e0f87bedac2c9bb260e3abf54e9862</signature></merchant></response>`),
+			m:      Merchant{"id", "pass"},
+			errMsg: "unexpected http status code",
+			code:   400,
 		},
 	}
 	url, method, req := "http://localhost", "POST", Request{}
@@ -155,8 +139,12 @@ func TestClient_DoContext(t *testing.T) {
 
 			cli := Client{do, nil, c.m}
 			actual := c.expected
-			err := cli.DoContext(context.Background(), url, method, req, &actual)
-			require.True(t, c.withErr == (err != nil), err)
+			if err := cli.DoContext(context.Background(), url, method, req, &actual); err != nil {
+				require.NotEmpty(t, c.errMsg)
+				require.ErrorContains(t, err, c.errMsg)
+				return
+			}
+			require.Empty(t, c.errMsg)
 			require.Equal(t, c.expected, actual)
 		})
 	}

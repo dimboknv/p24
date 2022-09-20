@@ -69,17 +69,16 @@ func TestStatement_TranDateTime(t *testing.T) {
 	cases := []struct {
 		statement Statement
 		expected  int64
-		withErr   bool
+		errMsg    string
 	}{
 		{
 			statement: Statement{TranTime: "21:21:21", TranDate: "2021-12-21"},
 			expected:  1640114481,
-			withErr:   false,
 		},
 		{
 			statement: Statement{TranTime: ""},
 			expected:  0,
-			withErr:   true,
+			errMsg:    "parsing time",
 		},
 	}
 	for i, c := range cases {
@@ -87,9 +86,11 @@ func TestStatement_TranDateTime(t *testing.T) {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			actual, err := c.statement.TranDateTime()
 			if err != nil {
-				require.True(t, c.withErr == (err != nil), err)
+				require.NotEmpty(t, c.errMsg)
+				require.ErrorContains(t, err, c.errMsg)
 				return
 			}
+			require.Empty(t, c.errMsg)
 			require.Equal(t, c.expected, actual.Unix())
 		})
 	}
@@ -102,9 +103,8 @@ func TestClient_GetStatements(t *testing.T) {
 		reqBody  []byte
 		respBody []byte
 		expected Statements
-		withErr  bool
+		errMsg   string
 	}{
-		// valid
 		{
 			opts: StatementsOpts{
 				StartDate:  time.Date(2021, 1, 1, 0, 0, 0, 0, kievLocation),
@@ -141,25 +141,21 @@ func TestClient_GetStatements(t *testing.T) {
 				Debet:  550,
 			},
 		},
-
-		// invalid opts
 		{
 			opts: StatementsOpts{
 				StartDate:  time.Date(2021, 1, 1, 1, 1, 0, 0, kievLocation),
 				EndDate:    time.Date(2021, 1, 1, 1, 1, 0, 0, kievLocation),
 				CardNumber: "err",
 			},
-			withErr: true,
+			errMsg: "invalid card number",
 		},
-
-		// invalid signature
 		{
 			opts: StatementsOpts{
 				StartDate:  time.Date(2021, 1, 1, 0, 0, 0, 0, kievLocation),
 				EndDate:    time.Date(2021, 1, 2, 0, 0, 0, 0, kievLocation),
 				CardNumber: "1234567890123456",
 			},
-			withErr:  true,
+			errMsg:   "invalid signature",
 			reqBody:  []byte(xml.Header + `<request version="1.0"><merchant><id>id</id><signature>6295880c80459b0b50d208de152dc1000bde1708</signature></merchant><data><payment id=""><prop name="sd" value="01.01.2021"></prop><prop name="ed" value="02.01.2021"></prop><prop name="card" value="1234567890123456"></prop></payment><oper>cmt</oper><wait>0</wait><test>0</test></data></request>`),
 			respBody: []byte(`<?xml version="1.0" encoding="UTF-8"?><response version="1.0"><merchant><id>id</id><signature>61ca17bc2ca05d70ec51611dfd6a84cf1fcc388f</signature></merchant><data><oper>cmt</oper><info><statements status="excellent" credit="0.0" debet="5.5"><statement card="1234567890123456" appcode="12345" trandate="2021-01-01" trantime="05:05:05" amount="5.50 UAH" cardamount="-5.50 UAH" rest="10 UAH" terminal="PrivatBank, 123" description="test"/></statements></info></data></response>`),
 		},
@@ -179,7 +175,12 @@ func TestClient_GetStatements(t *testing.T) {
 
 			cli := Client{do, nil, merchant}
 			actual, err := cli.GetStatements(context.Background(), c.opts)
-			require.True(t, c.withErr == (err != nil), err)
+			if err != nil {
+				require.NotEmpty(t, c.errMsg)
+				require.ErrorContains(t, err, c.errMsg)
+				return
+			}
+			require.Empty(t, c.errMsg)
 			require.Equal(t, c.expected, actual)
 		})
 	}

@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-// timeZoneEuropeKiev holds Europe/Kiev the IANA Time Zone database-formatted expectedErrMsg
+// timeZoneEuropeKiev holds Europe/Kiev in the IANA Time Zone database-format
 //go:embed timezone/Kiev
 var timeZoneEuropeKiev []byte
 
