@@ -2,10 +2,8 @@ package p24
 
 import (
 	"context"
-	"encoding/xml"
 	"fmt"
 	"net/http"
-	"strings"
 	"time"
 
 	"github.com/pkg/errors"
@@ -56,59 +54,20 @@ type Statements struct {
 
 // Statement represents a Statement of a p24 merchant
 type Statement struct {
-	Card        string    `xml:"card,attr"`
-	Appcode     string    `xml:"appcode,attr"`
-	TranDate    time.Time `xml:"-"`
-	Terminal    string    `xml:"terminal,attr"`
-	Description string    `xml:"description,attr"`
-	Amount      Funds     `xml:"amount,attr"`
-	CardAmount  Funds     `xml:"cardamount,attr"`
-	Rest        Funds     `xml:"rest,attr"`
+	Card        string `xml:"card,attr"`
+	Appcode     string `xml:"appcode,attr"`
+	TranTime    string `xml:"trantime,attr"`
+	TranDate    string `xml:"trandate,attr"`
+	Terminal    string `xml:"terminal,attr"`
+	Description string `xml:"description,attr"`
+	Amount      Funds  `xml:"amount,attr"`
+	CardAmount  Funds  `xml:"cardamount,attr"`
+	Rest        Funds  `xml:"rest,attr"`
 }
 
-type (
-	statementAlias       Statement
-	statementXMLMappings struct {
-		XMLName     xml.Name `xml:"statement"`
-		TranTimeStr string   `xml:"trantime,attr"`
-		TranDateStr string   `xml:"trandate,attr"`
-		statementAlias
-	}
-)
-
-// UnmarshalXML implements xml.Unmarshaler interface for s
-func (s *Statement) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
-	statement := &statementXMLMappings{}
-	if err := d.DecodeElement(statement, &start); err != nil {
-		return err
-	}
-
-	// parse tran date/time
+func (s *Statement) TranDateTime() (time.Time, error) {
 	layout := fmt.Sprintf("%s %s", statementsRespDateLayout, statementsRespTimeLayout)
-	tranDate, err := time.ParseInLocation(layout, fmt.Sprintf("%s %s", statement.TranDateStr, statement.TranTimeStr), kievLocation)
-	if err != nil {
-		return err
-	}
-	*s = Statement(statement.statementAlias)
-	s.TranDate = tranDate
-
-	return nil
-}
-
-// MarshalXML implements xml.Marshaler interface for s
-func (s Statement) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
-	start.Name.Local = strings.ToLower(start.Name.Local)
-	if start.Name.Local != "statement" {
-		return errors.New("invalid start elem name")
-	}
-
-	statements := &statementXMLMappings{
-		statementAlias: statementAlias(s),
-		TranTimeStr:    s.TranDate.Format(statementsRespTimeLayout),
-		TranDateStr:    s.TranDate.Format(statementsRespDateLayout),
-	}
-
-	return e.EncodeElement(statements, start)
+	return time.ParseInLocation(layout, fmt.Sprintf("%s %s", s.TranDate, s.TranTime), kievLocation)
 }
 
 // GetStatements returns Statements for given opts.

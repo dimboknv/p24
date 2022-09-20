@@ -12,14 +12,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func equalXML(t require.TestingT, expected, actual interface{}, msgAndArgs ...interface{}) {
-	actualXML, err := xml.Marshal(actual)
-	require.NoError(t, err)
-	expectedXML, err := xml.Marshal(expected)
-	require.NoError(t, err)
-	require.Equal(t, string(expectedXML), string(actualXML), msgAndArgs...)
-}
-
 func TestClient_DoContext(t *testing.T) {
 	cases := []struct {
 		expected Response

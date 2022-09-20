@@ -119,7 +119,7 @@ func TestClient_GetCardBalance(t *testing.T) {
 			cli := Client{do, nil, m}
 			actual, err := cli.GetCardBalance(context.Background(), c.opts)
 			require.True(t, c.withErr == (err != nil), err)
-			equalXML(t, c.expected, actual)
+			require.Equal(t, c.expected, actual)
 		})
 	}
 }

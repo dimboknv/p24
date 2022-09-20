@@ -65,64 +65,34 @@ func Test_StatementsOpts(t *testing.T) {
 	}
 }
 
-func Test_Statement(t *testing.T) {
-	t.Run("MarshalXML", func(t *testing.T) {
-		cases := []struct {
-			expected  []byte
-			statement Statement
-		}{
-			{
-				[]byte(`<statement trantime="21:34:00" trandate="2013-09-02" card="5168742060221193" appcode="801111" terminal="Пополнение мобильного" description="description" amount="0.10 UAH" cardamount="-0.10 UAH" rest="1.15 UAH"></statement>`),
-				Statement{"5168742060221193", "801111", time.Date(2013, 9, 2, 21, 34, 0, 0, kievLocation), "Пополнение мобильного", "description", Funds{"UAH", Amount(10)}, Funds{"UAH", Amount(-10)}, Funds{"UAH", Amount(115)}},
-			},
-		}
-		for i, c := range cases {
-			c := c
-			t.Run(strconv.Itoa(i), func(t *testing.T) {
-				actual, err := xml.Marshal(c.statement)
-				require.NoError(t, err)
-				require.Equal(t, string(c.expected), string(actual))
-			})
-		}
-	})
-
-	t.Run("UnmarshalXML", func(t *testing.T) {
-		cases := []struct {
-			data     []byte
-			expected Statement
-			withErr  bool
-		}{
-			{
-				[]byte(`<statement trandate="2013-09-02" trantime="21:34:00" card="5168742060221193" appcode="801111" terminal="Пополнение мобильного" description="description" amount="0.10 UAH" cardamount="-0.10 UAH" rest="1.15 UAH"></statement>`),
-				Statement{"5168742060221193", "801111", time.Date(2013, 9, 2, 21, 34, 0, 0, kievLocation), "Пополнение мобильного", "description", Funds{"UAH", Amount(10)}, Funds{"UAH", Amount(-10)}, Funds{"UAH", Amount(115)}},
-				false,
-			},
-			{
-				[]byte(`<statement card="1" ></statement1>`),
-				Statement{},
-				true,
-			},
-			{
-				[]byte(`<statement amount="0.10" card="51687420"></statement>`),
-				Statement{},
-				true,
-			},
-			{
-				[]byte(``),
-				Statement{},
-				true,
-			},
-		}
-		for i, c := range cases {
-			c := c
-			t.Run(strconv.Itoa(i), func(t *testing.T) {
-				var actual Statement
-				err := xml.Unmarshal(c.data, &actual)
+func TestStatement_TranDateTime(t *testing.T) {
+	cases := []struct {
+		statement Statement
+		expected  int64
+		withErr   bool
+	}{
+		{
+			statement: Statement{TranTime: "21:21:21", TranDate: "2021-12-21"},
+			expected:  1640114481,
+			withErr:   false,
+		},
+		{
+			statement: Statement{TranTime: ""},
+			expected:  0,
+			withErr:   true,
+		},
+	}
+	for i, c := range cases {
+		c := c
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			actual, err := c.statement.TranDateTime()
+			if err != nil {
 				require.True(t, c.withErr == (err != nil), err)
-				require.Equal(t, c.expected, actual)
-			})
-		}
-	})
+				return
+			}
+			require.Equal(t, c.expected, actual.Unix())
+		})
+	}
 }
 
 func TestClient_GetStatements(t *testing.T) {
@@ -149,7 +119,8 @@ func TestClient_GetStatements(t *testing.T) {
 					{
 						Card:        "1234567890123456",
 						Appcode:     "12345",
-						TranDate:    time.Date(2021, 1, 1, 5, 5, 5, 0, kievLocation),
+						TranDate:    "2021-01-01",
+						TranTime:    "05:05:05",
 						Terminal:    "PrivatBank, 123",
 						Description: "test",
 						Amount: Funds{
@@ -209,7 +180,7 @@ func TestClient_GetStatements(t *testing.T) {
 			cli := Client{do, nil, merchant}
 			actual, err := cli.GetStatements(context.Background(), c.opts)
 			require.True(t, c.withErr == (err != nil), err)
-			equalXML(t, c.expected, actual)
+			require.Equal(t, c.expected, actual)
 		})
 	}
 }
