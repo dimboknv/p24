@@ -148,16 +148,11 @@ func (c *Client) GetStatements(ctx context.Context, opts StatementsOpts) (Statem
 		},
 	}
 
-	req, err := NewRequest(c.m, reqData)
-	if err != nil {
-		return Statements{}, errors.Wrap(err, "can`t make request")
-	}
-
 	type info struct {
 		Statements Statements `xml:"statements"`
 	}
 	resp := Response{Data: ResponseData{Info: info{}}}
-	if err := c.DoContext(ctx, statementsAPIURL, http.MethodPost, req, &resp); err != nil {
+	if err := c.DoContext(ctx, statementsAPIURL, http.MethodPost, NewRequest(c.m, reqData), &resp); err != nil {
 		return Statements{}, err
 	}
 

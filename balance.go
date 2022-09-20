@@ -125,16 +125,11 @@ func (c *Client) GetCardBalance(ctx context.Context, opts BalanceOpts) (CardBala
 		},
 	}
 
-	req, err := NewRequest(c.m, reqData)
-	if err != nil {
-		return CardBalance{}, errors.Wrap(err, "can`t make request")
-	}
-
 	type info struct {
 		CardBalance CardBalance `xml:"cardbalance"`
 	}
 	resp := Response{Data: ResponseData{Info: info{}}}
-	if err := c.DoContext(ctx, cardBalanceAPIURL, http.MethodPost, req, &resp); err != nil {
+	if err := c.DoContext(ctx, cardBalanceAPIURL, http.MethodPost, NewRequest(c.m, reqData), &resp); err != nil {
 		return CardBalance{}, err
 	}
 
