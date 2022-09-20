@@ -95,7 +95,7 @@ func (c *Client) DoContext(ctx context.Context, url, method string, req Request,
 	}()
 	httpRespBody, err := io.ReadAll(httpResp.Body)
 	if err != nil {
-		return newError(errors.Wrap(err, "can`t read http response httpRespBody"), url, method, httpReqBody, nil)
+		return newError(errors.Wrap(err, "can`t read http response body"), url, method, httpReqBody, nil)
 	}
 	if httpResp.StatusCode >= 300 {
 		return newError(errors.Errorf("unexpected http status code %d", httpResp.StatusCode), url, method, httpReqBody, httpRespBody)
@@ -113,7 +113,7 @@ func (c *Client) DoContext(ctx context.Context, url, method string, req Request,
 		return newError(errors.New("xml response with invalid signature"), url, method, httpReqBody, httpRespBody)
 	}
 	if err = xml.Unmarshal(xmlResp, resp); err != nil {
-		return newError(errors.Wrap(err, "can`t unmarshal expectedErrMsg"), url, method, httpReqBody, httpRespBody)
+		return newError(errors.Wrap(err, "can`t unmarshal xml response"), url, method, httpReqBody, httpRespBody)
 	}
 
 	return nil
