@@ -43,6 +43,38 @@ func TestClient_DoContext(t *testing.T) {
 			m:    Merchant{"id", "pass"},
 			code: 200,
 		},
+		{ // can`t unmarshal xml response
+			expected: Response{
+				XMLName:      xml.Name{Local: "response"},
+				MerchantSign: MerchantSign{"id", "ad67cf1c11e0f87bedac2c9bb260e3abf54e9862"},
+				Data: ResponseData{
+					Oper: defaultOper,
+					Info: struct {
+						Test string `xml:"test1"`
+					}{Test: "test"},
+				},
+			},
+			body:    []byte(xml.Header + `<response><data><info><test>test</test></info><oper>cmt</oper></data><merchant><id>id</id><signature>ad67cf1c11e0f87bedac2c9bb260e3abf54e9862</signature></merchant></response>`),
+			m:       Merchant{"id", "pass"},
+			code:    200,
+			withErr: true,
+		},
+		{ // unexpected xml response content
+			expected: Response{
+				XMLName:      xml.Name{Local: "response"},
+				MerchantSign: MerchantSign{"id", "ad67cf1c11e0f87bedac2c9bb260e3abf54e9862"},
+				Data: ResponseData{
+					Oper: defaultOper,
+					Info: struct {
+						Test string `xml:"test"`
+					}{Test: "test"},
+				},
+			},
+			body:    []byte(xml.Header + `<response><data><info><test>test</test></info><oper>cmt</oper><merchant><id>id</id><signature>ad67cf1c11e0f87bedac2c9bb260e3abf54e9862</signature></merchant></response>`),
+			m:       Merchant{"id", "pass"},
+			code:    200,
+			withErr: true,
+		},
 		{ // can`t unmarshal data
 			expected: Response{
 				XMLName:      xml.Name{Local: "response"},
