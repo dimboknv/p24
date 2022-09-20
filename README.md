@@ -36,14 +36,12 @@ func main() {
 		},
 	})
 
-	// get merchant statements list for 02.01.2021 - 02.02.2021 date range
+	// get merchant statements list for 2021-12-25 - 2021-12-27 date range
 	// and "1234567891234567" card number
-	startDate, _ := time.Parse("02.01.2006", "02.01.2021")
-	endDate, _ := time.Parse("02.01.2006", "02.02.2021")
 	ctx := context.Background()
 	statements, err := client.GetStatements(ctx, p24.StatementsOpts{
-		StartDate:  startDate,
-		EndDate:    endDate,
+		StartDate:  time.Date(2021, 12, 25, 0, 0, 0, 0, time.Local),
+		EndDate:    time.Date(2021, 12, 27, 0, 0, 0, 0, time.Local),
 		CardNumber: "1234567891234567",
 	})
 	if err != nil {
