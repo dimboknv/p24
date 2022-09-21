@@ -5,9 +5,10 @@ import (
 	"context"
 	"encoding/xml"
 	"fmt"
-	"github.com/pkg/errors"
 	"io"
 	"net/http"
+
+	"github.com/pkg/errors"
 )
 
 // Error reports an error and the Method, URL, response/request body that caused it

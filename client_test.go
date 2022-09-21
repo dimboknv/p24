@@ -3,6 +3,7 @@ package p24
 import (
 	"context"
 	"encoding/xml"
+	"fmt"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -11,6 +12,39 @@ import (
 
 	"github.com/stretchr/testify/require"
 )
+
+func TestNewClient(t *testing.T) {
+	logOutput := ""
+	log := LogFunc(func(format string, args ...interface{}) {
+		logOutput = fmt.Sprintf(format, args...)
+	})
+
+	doerOutput := ""
+	doer := DoFunc(func(req *http.Request) (*http.Response, error) {
+		doerOutput = req.Method
+		return nil, nil
+	})
+
+	merchant := Merchant{
+		ID:   "id",
+		Pass: "pass",
+	}
+
+	cli := NewClient(ClientOpts{
+		HTTP:     doer,
+		Merchant: merchant,
+	})
+	require.Equal(t, merchant, cli.merchant)
+	require.NotNil(t, cli.log)
+
+	req, _ := http.NewRequest(http.MethodPost, "http://localhost", http.NoBody)
+	_, _ = cli.http.Do(req)
+	require.Equal(t, http.MethodPost, doerOutput)
+
+	cli = NewClient(ClientOpts{Log: log})
+	cli.log.Logf("%s", "test")
+	require.Equal(t, "test", logOutput)
+}
 
 func TestClient_DoContext(t *testing.T) {
 	cases := []struct {
