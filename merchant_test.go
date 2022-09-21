@@ -28,7 +28,7 @@ func Test_Merchant(t *testing.T) {
 	})
 	t.Run("VerifySign", func(t *testing.T) {
 		cases := []struct {
-			m        Merchant
+			merchant Merchant
 			data     string
 			dataSign MerchantSign
 			errMsg   string
@@ -41,7 +41,7 @@ func Test_Merchant(t *testing.T) {
 		for i, c := range cases {
 			c := c
 			t.Run(strconv.Itoa(i), func(t *testing.T) {
-				err := c.m.VerifySign([]byte(c.data), c.dataSign)
+				err := c.merchant.VerifySign([]byte(c.data), c.dataSign)
 				if err != nil {
 					require.EqualError(t, err, c.errMsg)
 				} else {

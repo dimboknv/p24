@@ -42,7 +42,7 @@ func (m Merchant) Sign(data []byte) MerchantSign {
 	}
 }
 
-// VerifySign returns an error if dataSign not from m.Sign(data)
+// VerifySign returns an error if dataSign not from merchant.Sign(data)
 func (m Merchant) VerifySign(data []byte, dataSign MerchantSign) error {
 	if dataSign != m.Sign(data) {
 		return errors.New("invalid signature")

@@ -85,12 +85,12 @@ type Funds struct {
 	Amount   Amount
 }
 
-// MarshalText implements the encoding.TextMarshaler interface for f
+// MarshalText implements the encoding.TextMarshaler interface for funds
 func (f Funds) MarshalText() ([]byte, error) {
 	return []byte(fmt.Sprintf("%s %s", f.Amount.String(), f.Currency)), nil
 }
 
-// UnmarshalText implements the encoding.TextUnmarshaler interface for f
+// UnmarshalText implements the encoding.TextUnmarshaler interface for funds
 func (f *Funds) UnmarshalText(text []byte) error {
 	vales := bytes.Split(text, []byte(" "))
 	if len(vales) != 2 {
@@ -106,7 +106,7 @@ func (f *Funds) UnmarshalText(text []byte) error {
 	return nil
 }
 
-// String returns string representation of f
+// String returns string representation of funds
 func (f Funds) String() string {
 	text, _ := f.MarshalText()
 	return string(text) // nil slice will be converted to ""

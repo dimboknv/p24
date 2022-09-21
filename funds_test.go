@@ -88,7 +88,7 @@ func Test_Funds(t *testing.T) {
 	t.Run("MarshalText", func(t *testing.T) {
 		cases := []struct {
 			expected []byte
-			f        Funds
+			funds    Funds
 		}{
 			{[]byte("0 UAH"), Funds{"UAH", 0}},
 			{[]byte("0 "), Funds{"", 0}},
@@ -106,7 +106,7 @@ func Test_Funds(t *testing.T) {
 		for i, c := range cases {
 			c := c
 			t.Run(strconv.Itoa(i), func(t *testing.T) {
-				actual, _ := c.f.MarshalText()
+				actual, _ := c.funds.MarshalText()
 				require.Equal(t, string(c.expected), string(actual))
 			})
 		}

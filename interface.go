@@ -21,5 +21,5 @@ type Logger interface {
 // LogFunc type is an adapter to allow the use of ordinary functions as Logger
 type LogFunc func(format string, args ...interface{})
 
-// Logf calls f(id)
+// Logf calls funds(id)
 func (f LogFunc) Logf(format string, args ...interface{}) { f(format, args...) }

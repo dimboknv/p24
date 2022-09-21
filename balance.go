@@ -129,7 +129,7 @@ func (c *Client) GetCardBalance(ctx context.Context, opts BalanceOpts) (CardBala
 		CardBalance CardBalance `xml:"cardbalance"`
 	}
 	resp := Response{Data: ResponseData{Info: info{}}}
-	if err := c.DoContext(ctx, cardBalanceAPIURL, http.MethodPost, NewRequest(c.m, reqData), &resp); err != nil {
+	if err := c.DoContext(ctx, cardBalanceAPIURL, http.MethodPost, NewRequest(c.merchant, reqData), &resp); err != nil {
 		return CardBalance{}, err
 	}
 

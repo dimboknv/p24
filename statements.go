@@ -67,8 +67,8 @@ type Statement struct {
 }
 
 type (
-	statementAlias       Statement
-	statementXMLMappings struct {
+	statementAlias Statement
+	statementXML   struct {
 		XMLName     xml.Name `xml:"statement"`
 		TranTimeStr string   `xml:"trantime,attr"`
 		TranDateStr string   `xml:"trandate,attr"`
@@ -78,7 +78,7 @@ type (
 
 // UnmarshalXML implements xml.Unmarshaler interface for s
 func (s *Statement) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
-	statement := &statementXMLMappings{}
+	statement := &statementXML{}
 	if err := d.DecodeElement(statement, &start); err != nil {
 		return err
 	}
@@ -102,7 +102,7 @@ func (s Statement) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
 		return errors.New("invalid start elem name")
 	}
 
-	statements := &statementXMLMappings{
+	statements := &statementXML{
 		statementAlias: statementAlias(s),
 		TranTimeStr:    s.Date.Format(statementsRespTimeLayout),
 		TranDateStr:    s.Date.Format(statementsRespDateLayout),
@@ -152,7 +152,7 @@ func (c *Client) GetStatements(ctx context.Context, opts StatementsOpts) (Statem
 		Statements Statements `xml:"statements"`
 	}
 	resp := Response{Data: ResponseData{Info: info{}}}
-	if err := c.DoContext(ctx, statementsAPIURL, http.MethodPost, NewRequest(c.m, reqData), &resp); err != nil {
+	if err := c.DoContext(ctx, statementsAPIURL, http.MethodPost, NewRequest(c.merchant, reqData), &resp); err != nil {
 		return Statements{}, err
 	}
 

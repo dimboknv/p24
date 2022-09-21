@@ -42,9 +42,9 @@ func newError(err error, url, method string, resp, req []byte) *Error {
 // Implements p24 information API client.
 // see: https://api.privatbank.ua/#p24/main
 type Client struct {
-	http Doer
-	l    Logger
-	m    Merchant
+	http     Doer
+	log      Logger
+	merchant Merchant
 }
 
 // ClientOpts is a full set of all parameters to initialize Client
@@ -56,14 +56,14 @@ type ClientOpts struct {
 
 // NewClient returns Client instance with given opts
 func NewClient(opts ClientOpts) *Client {
-	var l Logger = LogFunc(func(format string, args ...interface{}) {})
+	var log Logger = LogFunc(func(format string, args ...interface{}) {})
 	if opts.Log != nil {
-		l = opts.Log
+		log = opts.Log
 	}
 	return &Client{
-		http: opts.HTTP,
-		l:    l,
-		m:    opts.Merchant,
+		http:     opts.HTTP,
+		log:      log,
+		merchant: opts.Merchant,
 	}
 }
 
@@ -90,7 +90,7 @@ func (c *Client) DoContext(ctx context.Context, url, method string, req Request,
 	}
 	defer func() {
 		if err = httpResp.Body.Close(); err != nil {
-			c.l.Logf("[WARN] failed to close http response body: %+v\n", err)
+			c.log.Logf("[WARN] failed to close http response body: %+v\n", err)
 		}
 	}()
 	httpRespBody, err := io.ReadAll(httpResp.Body)
@@ -109,7 +109,7 @@ func (c *Client) DoContext(ctx context.Context, url, method string, req Request,
 	if err = xmlResp.CheckContent(); err != nil {
 		return newError(errors.Wrap(err, "unexpected xml response content"), url, method, httpReqBody, httpRespBody)
 	}
-	if err = xmlResp.VerifySign(c.m); err != nil {
+	if err = xmlResp.VerifySign(c.merchant); err != nil {
 		return newError(errors.New("xml response with invalid signature"), url, method, httpReqBody, httpRespBody)
 	}
 	if err = xml.Unmarshal(xmlResp, resp); err != nil {
