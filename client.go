@@ -5,18 +5,10 @@ import (
 	"context"
 	"encoding/xml"
 	"fmt"
+	"github.com/pkg/errors"
 	"io"
 	"net/http"
-	"time"
-
-	"github.com/pkg/errors"
-	"golang.org/x/time/rate"
 )
-
-// NewRateLimiter returns rate.Limiter for p24 api (2 request every 1 seconds)
-func NewRateLimiter() *rate.Limiter {
-	return rate.NewLimiter(rate.Every(time.Second), 2)
-}
 
 // Error reports an error and the Method, URL, response/request body that caused it
 type Error struct {
